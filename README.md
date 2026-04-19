@@ -5,14 +5,31 @@ Working CLI prototype for the CSE 435 seminar topic: ensuring digital evidence i
 The prototype supports two ledger backends behind the same interface:
 
 - SQLite fallback, which works offline and is used automatically when Ganache is not configured.
-- Ganache + Solidity, using `contracts/EvidenceLedger.sol` for a local Ethereum demo.
+- Ganache + Solidity, using `backend/contracts/EvidenceLedger.sol` for a local Ethereum demo.
 - FastAPI + Supabase backend for a deployable web/API demo.
+
+## Project Layout
+
+```text
+D:\mini
+├── backend\              # FastAPI backend, CLI demo, tests, Python requirements
+│   ├── main.py
+│   ├── requirements.txt
+│   ├── src\
+│   ├── scripts\
+│   ├── tests\
+│   └── .env              # local backend secrets, gitignored
+├── frontend\
+│   └── index.html        # static frontend, no build step
+└── README.md
+```
 
 ## Quickstart
 
-Put or paste your evidence content into the root-level file named `evidence`.
+Put or paste your evidence content into `backend\evidence`.
 
 ```powershell
+cd D:\mini\backend
 python -m venv .venv
 .\.venv\Scripts\Activate.ps1
 pip install -r requirements.txt
@@ -44,9 +61,9 @@ CREATE TABLE records (
 );
 ```
 
-Create a local `.env` file:
+Create a local backend `.env` file at `backend\.env`:
 
-```powershell
+```env
 SUPABASE_URL=https://your-project.supabase.co
 SUPABASE_KEY=your-supabase-key
 FRONTEND_URL=http://localhost:5173
@@ -55,6 +72,7 @@ FRONTEND_URL=http://localhost:5173
 Run the API:
 
 ```powershell
+cd D:\mini\backend
 uvicorn main:app --reload
 ```
 
@@ -75,20 +93,36 @@ API endpoints:
 
 The API stores only hashes and metadata in Supabase. Uploaded files are not permanently stored.
 
+## Static Frontend
+
+Open `frontend\index.html` directly in your browser after the API is running:
+
+```text
+D:\mini\frontend\index.html
+```
+
+The frontend uses this backend URL at the top of its script:
+
+```js
+const API_URL = "http://localhost:8000";
+```
+
+For production, change that value to your Render backend URL before deploying the file. You can deploy it by dragging `frontend\index.html` into Vercel.
+
 Example API flow with PowerShell:
 
 ```powershell
 $register = Invoke-RestMethod `
   -Uri "http://127.0.0.1:8000/evidence/register" `
   -Method Post `
-  -Form @{ case_name = "demo case"; file = Get-Item ".\evidence" }
+  -Form @{ case_name = "demo case"; file = Get-Item "D:\mini\backend\evidence" }
 
 $register.case_id
 
 Invoke-RestMethod `
   -Uri "http://127.0.0.1:8000/evidence/verify" `
   -Method Post `
-  -Form @{ case_id = $register.case_id; file = Get-Item ".\evidence" }
+  -Form @{ case_id = $register.case_id; file = Get-Item "D:\mini\backend\evidence" }
 ```
 
 ## Useful Commands
@@ -96,24 +130,28 @@ Invoke-RestMethod `
 Hash a file:
 
 ```powershell
+cd D:\mini\backend
 python -m src.hash_evidence
 ```
 
 Store a record:
 
 ```powershell
+cd D:\mini\backend
 python -m src.store_record CASE-001 --backend sqlite
 ```
 
 Verify the vaulted evidence:
 
 ```powershell
+cd D:\mini\backend
 python -m src.verify_evidence CASE-001 --backend sqlite
 ```
 
 Simulate tampering:
 
 ```powershell
+cd D:\mini\backend
 python -m src.simulate_tampering CASE-001 --backend sqlite
 ```
 
@@ -128,6 +166,7 @@ python -m src.simulate_tampering CASE-001 --backend sqlite
 Start Ganache on `http://127.0.0.1:7545`, then deploy the contract:
 
 ```powershell
+cd D:\mini\backend
 python scripts/deploy_contract.py
 ```
 
@@ -154,6 +193,12 @@ If Ganache, Web3.py, or the contract address is unavailable and `EVIDENCE_BACKEN
 - `FRONTEND_URL`: deployed frontend origin for CORS
 
 ## Render Deployment
+
+Set Render **Root Directory** to:
+
+```text
+backend
+```
 
 Backend build command:
 
