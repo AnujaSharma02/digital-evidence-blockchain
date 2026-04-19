@@ -1,0 +1,43 @@
+- main [ref=e2]:
+  - generic [ref=e3]:
+    - heading "Blockchain-Based Digital Evidence Integrity System" [level=1] [ref=e4]
+    - paragraph [ref=e5]: CSE 435 - Comprehensive Seminar Demo
+  - generic [ref=e6]:
+    - heading "Register Evidence" [level=2] [ref=e7]
+    - paragraph [ref=e8]: Upload a file and give it a case name. The system generates a unique Case ID and records its SHA-256 fingerprint.
+    - generic [ref=e9]:
+      - generic [ref=e10]:
+        - text: Case name
+        - textbox "Case name" [ref=e11]:
+          - /placeholder: Enter case name (e.g. cyber-fraud)
+      - generic [ref=e12]:
+        - text: Evidence file
+        - button "Evidence file" [ref=e13]
+      - button "Register Evidence" [ref=e14] [cursor=pointer]
+  - generic [ref=e15]:
+    - heading "Verify Evidence" [level=2] [ref=e16]
+    - paragraph [ref=e17]: Upload the original file and enter its Case ID to check if it has been tampered with.
+    - generic [ref=e18]:
+      - generic [ref=e19]:
+        - text: Case ID
+        - textbox "Case ID" [ref=e20]:
+          - /placeholder: Enter Case ID (e.g. cyber-fraud-A3F8B21C)
+      - generic [ref=e21]:
+        - text: Evidence file
+        - button "Evidence file" [ref=e22]
+      - button "Verify Evidence" [ref=e23] [cursor=pointer]
+  - generic [ref=e24]:
+    - heading "Tamper Demo" [level=2] [ref=e25]
+    - paragraph [ref=e26]: Upload any file to corrupt it. Download the corrupted version, then submit it to Verify to see tamper detection in action.
+    - generic [ref=e27]:
+      - generic [ref=e28]:
+        - text: File to corrupt
+        - button "File to corrupt" [ref=e29]
+      - button "Corrupt This File" [ref=e30] [cursor=pointer]
+  - generic [ref=e31]:
+    - heading "Registered Evidence" [level=2] [ref=e32]
+    - paragraph [ref=e33]: Refresh the list to view the records stored by the backend.
+    - generic [ref=e34]:
+      - button "Refresh List" [ref=e35] [cursor=pointer]
+      - paragraph
+    - paragraph [ref=e37]: Click Refresh to load registered evidence.

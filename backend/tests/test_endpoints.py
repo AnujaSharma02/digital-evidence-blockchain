@@ -3,7 +3,8 @@ from dataclasses import replace
 from fastapi.testclient import TestClient
 
 import main
-from main import app, repository_dependency, sha256_bytes
+from main import app, repository_dependency
+from tests.helpers import sha256_bytes
 from src.db import EvidenceRecord, SupabaseConfigError
 
 
@@ -187,7 +188,7 @@ def test_tamper_returns_corrupted_download_with_hash_headers() -> None:
     assert response.headers["X-Original-Hash"] == sha256_bytes(b"original evidence")
     assert response.headers["X-Tampered-Hash"] == sha256_bytes(response.content)
     assert response.headers["X-Original-Filename"] == "email.eml"
-    assert response.headers["Content-Disposition"] == 'attachment; filename="tampered_email.eml"'
+    assert response.headers["Content-Disposition"] == "attachment; filename*=UTF-8''tampered_email.eml"
 
 
 def test_register_without_supabase_env_returns_clear_500(monkeypatch) -> None:

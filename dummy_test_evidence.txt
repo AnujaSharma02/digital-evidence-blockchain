@@ -1,0 +1,3 @@
+This is a dummy evidence file for testing the Blockchain Evidence Integrity System.
+Case: playwright-test
+Timestamp: 2026-04-20

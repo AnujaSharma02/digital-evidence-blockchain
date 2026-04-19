@@ -3,9 +3,11 @@
 from __future__ import annotations
 
 import hashlib
+import logging
 import secrets
 import tempfile
 from datetime import datetime, timezone
+from urllib.parse import quote
 
 from fastapi import Depends, FastAPI, File, Form, HTTPException, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
@@ -14,7 +16,7 @@ from starlette.background import BackgroundTask
 
 from src import config
 from src.case_id import CaseIdGenerationError, generate_case_id
-from src.db import EvidenceRecord, SupabaseConfigError, SupabaseRepositoryError, get_repository
+from src.db import EvidenceRecord, SupabaseConfigError, SupabaseRepositoryError, get_repository, reset_repository_cache
 
 
 app = FastAPI(title="Digital Evidence Integrity API", version="1.0.0")
@@ -38,16 +40,16 @@ app.add_middleware(
 )
 
 
+_logger = logging.getLogger(__name__)
+
+
 @app.exception_handler(Exception)
 async def unhandled_exception_handler(request, exc: Exception) -> JSONResponse:
+    _logger.exception("Unhandled exception on %s %s", request.method, request.url.path)
     return JSONResponse(
         status_code=500,
-        content={"detail": f"{type(exc).__name__}: {exc}"},
+        content={"detail": "An internal server error occurred."},
     )
-
-
-def sha256_bytes(content: bytes) -> str:
-    return hashlib.sha256(content).hexdigest()
 
 
 def repository_dependency():
@@ -55,8 +57,11 @@ def repository_dependency():
         return get_repository()
     except SupabaseConfigError as exc:
         raise HTTPException(status_code=500, detail=str(exc)) from exc
-    except SupabaseRepositoryError as exc:
-        raise HTTPException(status_code=500, detail=str(exc)) from exc
+
+
+def _db_error(exc: SupabaseRepositoryError) -> HTTPException:
+    reset_repository_cache()
+    return HTTPException(status_code=500, detail=str(exc))
 
 
 async def sha256_upload(file: UploadFile) -> str:
@@ -74,6 +79,14 @@ async def sha256_upload(file: UploadFile) -> str:
         raise HTTPException(status_code=400, detail="Uploaded file must not be empty")
 
     return digest.hexdigest()
+
+
+async def _iter_spooled(f: tempfile.SpooledTemporaryFile, chunk_size: int):
+    while True:
+        chunk = f.read(chunk_size)
+        if not chunk:
+            break
+        yield chunk
 
 
 async def tamper_upload(file: UploadFile) -> tuple[tempfile.SpooledTemporaryFile[bytes], str, str]:
@@ -135,7 +148,7 @@ async def register_evidence(
     except CaseIdGenerationError as exc:
         raise HTTPException(status_code=500, detail=str(exc)) from exc
     except SupabaseRepositoryError as exc:
-        raise HTTPException(status_code=500, detail=str(exc)) from exc
+        raise _db_error(exc) from exc
 
     return {
         "case_id": record.case_id,
@@ -155,7 +168,7 @@ async def verify_evidence(
     try:
         record = repository.fetch(case_id)
     except SupabaseRepositoryError as exc:
-        raise HTTPException(status_code=500, detail=str(exc)) from exc
+        raise _db_error(exc) from exc
     if record is None:
         raise HTTPException(status_code=404, detail="case_id not found")
 
@@ -178,14 +191,15 @@ async def tamper_evidence(file: UploadFile = File(...)) -> StreamingResponse:
     download_name = f"tampered_{original_filename}"
 
     response = StreamingResponse(
-        corrupted_file,
+        _iter_spooled(corrupted_file, config.CHUNK_SIZE),
         media_type=file.content_type or "application/octet-stream",
         background=BackgroundTask(corrupted_file.close),
     )
     response.headers["X-Original-Hash"] = original_hash
     response.headers["X-Tampered-Hash"] = tampered_hash
     response.headers["X-Original-Filename"] = original_filename
-    response.headers["Content-Disposition"] = f'attachment; filename="{download_name.replace(chr(34), "")}"'
+    safe_name = quote(download_name, safe="-_.~")
+    response.headers["Content-Disposition"] = f"attachment; filename*=UTF-8''{safe_name}"
     return response
 
 
@@ -194,7 +208,7 @@ def list_evidence(repository=Depends(repository_dependency)) -> dict[str, object
     try:
         records = repository.list_records()
     except SupabaseRepositoryError as exc:
-        raise HTTPException(status_code=500, detail=str(exc)) from exc
+        raise _db_error(exc) from exc
     items = [
         {
             "case_id": record.case_id,
@@ -211,7 +225,7 @@ def get_evidence(case_id: str, repository=Depends(repository_dependency)) -> dic
     try:
         record = repository.fetch(case_id)
     except SupabaseRepositoryError as exc:
-        raise HTTPException(status_code=500, detail=str(exc)) from exc
+        raise _db_error(exc) from exc
     if record is None:
         raise HTTPException(status_code=404, detail="case_id not found")
     return record.to_api_dict()

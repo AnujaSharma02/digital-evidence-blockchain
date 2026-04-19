@@ -1,0 +1,96 @@
+- main [ref=e2]:
+  - generic [ref=e3]:
+    - heading "Blockchain-Based Digital Evidence Integrity System" [level=1] [ref=e4]
+    - paragraph [ref=e5]: CSE 435 - Comprehensive Seminar Demo
+  - generic [ref=e6]:
+    - heading "Register Evidence" [level=2] [ref=e7]
+    - paragraph [ref=e8]: Upload a file and give it a case name. The system generates a unique Case ID and records its SHA-256 fingerprint.
+    - generic [ref=e9]:
+      - generic [ref=e10]:
+        - text: Case name
+        - textbox "Case name" [ref=e11]:
+          - /placeholder: Enter case name (e.g. cyber-fraud)
+          - text: playwright-test
+      - generic [ref=e12]:
+        - text: Evidence file
+        - button "Evidence file" [ref=e13]
+      - button "Register Evidence" [ref=e14] [cursor=pointer]
+    - generic [ref=e57]:
+      - heading "Evidence Registered Successfully" [level=3] [ref=e58]
+      - generic [ref=e59]:
+        - generic [ref=e60]: playwright-test-BX1HSQSG
+        - button "Copy" [ref=e61] [cursor=pointer]
+      - generic [ref=e62]:
+        - generic [ref=e63]:
+          - strong [ref=e64]: "Hash:"
+          - code [ref=e65]: 5558dcd2d5d607ccd1828dda78f9fd4861d78a26988de16757a6a2acd3f31d93
+        - generic [ref=e66]:
+          - strong [ref=e67]: "Filename:"
+          - text: dummy_test_evidence.txt
+        - generic [ref=e68]:
+          - strong [ref=e69]: "Timestamp:"
+          - text: Apr 20, 2026, 01:46 AM
+      - paragraph [ref=e70]:
+        - strong [ref=e71]: Save this Case ID. You will need it to verify this evidence later.
+  - generic [ref=e15]:
+    - heading "Verify Evidence" [level=2] [ref=e16]
+    - paragraph [ref=e17]: Upload the original file and enter its Case ID to check if it has been tampered with.
+    - generic [ref=e18]:
+      - generic [ref=e19]:
+        - text: Case ID
+        - textbox "Case ID" [ref=e20]:
+          - /placeholder: Enter Case ID (e.g. cyber-fraud-A3F8B21C)
+          - text: playwright-test-BX1HSQSG
+      - generic [ref=e21]:
+        - text: Evidence file
+        - button "Evidence file" [active] [ref=e22]
+      - button "Verify Evidence" [ref=e23] [cursor=pointer]
+    - generic [ref=e73]:
+      - heading "✓ INTACT" [level=3] [ref=e74]
+      - paragraph [ref=e75]: This evidence has not been tampered with.
+      - generic [ref=e76]:
+        - generic [ref=e77]:
+          - generic [ref=e78]: Stored hash
+          - code [ref=e79]: 5558dcd2d5d607ccd1828dda78f9fd4861d78a26988de16757a6a2acd3f31d93
+        - generic [ref=e80]:
+          - generic [ref=e81]: Submitted hash
+          - code [ref=e82]: 5558dcd2d5d607ccd1828dda78f9fd4861d78a26988de16757a6a2acd3f31d93
+  - generic [ref=e24]:
+    - heading "Tamper Demo" [level=2] [ref=e25]
+    - paragraph [ref=e26]: Upload any file to corrupt it. Download the corrupted version, then submit it to Verify to see tamper detection in action.
+    - generic [ref=e27]:
+      - generic [ref=e28]:
+        - text: File to corrupt
+        - button "File to corrupt" [ref=e29]
+      - button "Corrupt This File" [ref=e30] [cursor=pointer]
+    - generic [ref=e84]:
+      - heading "File Corrupted - Download Started" [level=3] [ref=e85]
+      - generic [ref=e86]:
+        - generic [ref=e87]:
+          - generic [ref=e88]: Original hash
+          - code [ref=e89]: 5558dcd2d5d607ccd1828dda78f9fd4861d78a26988de16757a6a2acd3f31d93
+        - generic [ref=e90]:
+          - generic [ref=e91]: Tampered hash
+          - code [ref=e92]: 352841443969aa06b78740741666c7a2ba7bab58a47b075833e89e1044a5927f
+      - paragraph [ref=e93]: Now go to the Verify section, enter a registered Case ID, and upload the downloaded corrupted file to see the TAMPERED result.
+  - generic [ref=e31]:
+    - heading "Registered Evidence" [level=2] [ref=e32]
+    - paragraph [ref=e33]: Refresh the list to view the records stored by the backend.
+    - generic [ref=e34]:
+      - button "Refresh List" [ref=e39] [cursor=pointer]
+      - paragraph [ref=e40]: "Total records: 2"
+    - table [ref=e41]:
+      - rowgroup [ref=e42]:
+        - row "Case ID Filename Registered At" [ref=e43]:
+          - columnheader "Case ID" [ref=e44]
+          - columnheader "Filename" [ref=e45]
+          - columnheader "Registered At" [ref=e46]
+      - rowgroup [ref=e47]:
+        - row "playwright-live-1776628524461-C4GU34JM dummy_evidence_playwright.txt Apr 20, 2026, 01:25 AM" [ref=e48]:
+          - cell "playwright-live-1776628524461-C4GU34JM" [ref=e49]
+          - cell "dummy_evidence_playwright.txt" [ref=e50]
+          - cell "Apr 20, 2026, 01:25 AM" [ref=e51]
+        - row "direct-live-1776628462535-RQD3LQHV dummy-direct-live.txt Apr 20, 2026, 01:24 AM" [ref=e52]:
+          - cell "direct-live-1776628462535-RQD3LQHV" [ref=e53]
+          - cell "dummy-direct-live.txt" [ref=e54]
+          - cell "Apr 20, 2026, 01:24 AM" [ref=e55]
