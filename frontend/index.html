@@ -305,6 +305,45 @@
       color: var(--muted);
     }
 
+    .testing-section {
+      border: 1px dashed #444;
+    }
+
+    .testing-section h3 {
+      margin: 0 0 6px;
+      font-size: 1rem;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    .testing-note {
+      margin: 0 0 20px;
+      color: var(--amber);
+      font-size: 0.875rem;
+    }
+
+    .danger-btn {
+      background: var(--red);
+      color: #fff;
+      border: none;
+      border-radius: 6px;
+      padding: 10px 20px;
+      font-size: 0.95rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: opacity 0.15s;
+    }
+
+    .danger-btn:hover:not(:disabled) {
+      opacity: 0.85;
+    }
+
+    .danger-btn:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
     @media (max-width: 560px) {
       main {
         width: min(100% - 20px, 860px);
@@ -381,7 +420,22 @@
     </section>
 
     <section>
-      <h2>Tamper Demo</h2>
+      <h2>Registered Evidence</h2>
+      <p>Refresh the list to view the records stored by the backend.</p>
+      <div class="list-actions">
+        <button id="refresh-list" type="button">Refresh List</button>
+        <p id="list-total" class="total"></p>
+      </div>
+      <div id="list-result" aria-live="polite">
+        <p class="empty">Click Refresh to load registered evidence.</p>
+      </div>
+    </section>
+
+    <section class="testing-section">
+      <h2>Testing Tools</h2>
+      <p class="testing-note">For demo and testing only — not intended for production use.</p>
+
+      <h3>Corrupt a File</h3>
       <p>Upload any file (or folder) to corrupt it. Download the result, then verify it against a registered Case ID to see tamper detection in action.</p>
       <form id="tamper-form">
         <label>
@@ -396,18 +450,11 @@
         <button id="tamper-button" type="submit">Corrupt This File</button>
       </form>
       <div id="tamper-result" aria-live="polite"></div>
-    </section>
 
-    <section>
-      <h2>Registered Evidence</h2>
-      <p>Refresh the list to view the records stored by the backend.</p>
-      <div class="list-actions">
-        <button id="refresh-list" type="button">Refresh List</button>
-        <p id="list-total" class="total"></p>
-      </div>
-      <div id="list-result" aria-live="polite">
-        <p class="empty">Click Refresh to load registered evidence.</p>
-      </div>
+      <h3 style="margin-top:28px">Clear Database</h3>
+      <p>Permanently delete all registered evidence records. Use this to reset the demo environment.</p>
+      <button id="clear-db-button" class="danger-btn" type="button">Clear All Records</button>
+      <div id="clear-db-result" aria-live="polite"></div>
     </section>
   </main>
 
@@ -576,7 +623,7 @@
       return items;
     }
 
-    async function buildFilePayload(items) {
+    async function buildFilePayload(items, zipName = "evidence_bundle") {
       // Filter OS-generated noise before hashing
       const filtered = items.filter(i => !isSystemFile(i.path));
       const normalized = normalizeItemPaths(filtered);
@@ -590,7 +637,11 @@
         zip.file(path, await file.arrayBuffer(), { compression: "STORE", date: new Date(0) });
       }
       const blob = await zip.generateAsync({ type: "blob", comment: "" });
-      return new File([blob], "evidence_bundle.zip", { type: "application/zip" });
+      return new File([blob], `${zipName}.zip`, { type: "application/zip" });
+    }
+
+    function slugify(name) {
+      return name.trim().toLowerCase().replace(/[^a-z0-9]+/g, "_").replace(/^_+|_+$/, "") || "evidence";
     }
 
     // ---------------------------------------------------------------------------
@@ -685,7 +736,8 @@
       setLoading("register-button", true, zipLabel, "Register Evidence");
 
       try {
-        const payload = await buildFilePayload(items);
+        const caseName = document.getElementById("register-case-name").value;
+        const payload = await buildFilePayload(items, slugify(caseName));
         if (items.length > 1) setLoading("register-button", true, "Registering\u2026", "Register Evidence");
 
         const formData = new FormData();
@@ -877,6 +929,34 @@
         showResult("list-result", "error", `<h3>Error</h3><p>${escapeHtml(networkMessage(error))}</p>`);
       } finally {
         setLoading("refresh-list", false, "Loading\u2026", "Refresh List");
+      }
+    });
+
+    // ---------------------------------------------------------------------------
+    // Clear Database
+    // ---------------------------------------------------------------------------
+
+    document.getElementById("clear-db-button").addEventListener("click", async () => {
+      if (!confirm("This will permanently delete ALL evidence records. Continue?")) return;
+      const btn = document.getElementById("clear-db-button");
+      const resultEl = document.getElementById("clear-db-result");
+      btn.disabled = true;
+      btn.textContent = "Clearing\u2026";
+      resultEl.innerHTML = "";
+
+      try {
+        const response = await fetch(`${API_URL}/evidence/all`, { method: "DELETE" });
+        if (!response.ok) throw new Error(await parseError(response));
+        const data = await response.json();
+        resultEl.innerHTML = `<p style="color:var(--green);margin:10px 0 0">${escapeHtml(data.message)} (${data.deleted} record${data.deleted === 1 ? "" : "s"} removed)</p>`;
+        // Also clear the evidence list display
+        document.getElementById("list-result").innerHTML = '<p class="empty">No evidence registered yet.</p>';
+        document.getElementById("list-total").textContent = "";
+      } catch (error) {
+        resultEl.innerHTML = `<p style="color:var(--red);margin:10px 0 0">${escapeHtml(networkMessage(error))}</p>`;
+      } finally {
+        btn.disabled = false;
+        btn.textContent = "Clear All Records";
       }
     });
 

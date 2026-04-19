@@ -111,6 +111,18 @@ class SupabaseEvidenceRepository:
             raise SupabaseRepositoryError(f"Supabase list failed: {exc}") from exc
         return [EvidenceRecord.from_row(row) for row in _extract_rows(result)]
 
+    def delete_all(self) -> int:
+        try:
+            result = (
+                self.client.table("records")
+                .delete()
+                .neq("case_id", "")
+                .execute()
+            )
+        except Exception as exc:
+            raise SupabaseRepositoryError(f"Supabase delete_all failed: {exc}") from exc
+        return len(_extract_rows(result))
+
 
 def _extract_rows(result: Any) -> list[dict[str, Any]]:
     rows = getattr(result, "data", None)

@@ -203,6 +203,16 @@ async def tamper_evidence(file: UploadFile = File(...)) -> StreamingResponse:
     return response
 
 
+@app.delete("/evidence/all")
+def clear_all_evidence(repository=Depends(repository_dependency)) -> dict[str, object]:
+    try:
+        deleted = repository.delete_all()
+    except SupabaseRepositoryError as exc:
+        raise _db_error(exc) from exc
+    reset_repository_cache()
+    return {"deleted": deleted, "message": "All evidence records cleared."}
+
+
 @app.get("/evidence/list")
 def list_evidence(repository=Depends(repository_dependency)) -> dict[str, object]:
     try:
