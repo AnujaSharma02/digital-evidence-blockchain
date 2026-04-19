@@ -21,6 +21,7 @@ app = FastAPI(title="Digital Evidence Integrity API", version="1.0.0")
 cors_origins = [
     "http://localhost:5173",
     "https://blockchain-eta-taupe.vercel.app",
+    "https://mini-ka-project.vercel.app",
 ]
 if config.FRONTEND_URL:
     cors_origins.append(config.FRONTEND_URL)
@@ -65,6 +66,7 @@ def health() -> dict[str, str]:
     return {
         "status": "ok",
         "backend": "supabase",
+        "app_version": "cors-vercel-mini-2026-04-20",
         "timestamp": datetime.now(timezone.utc).isoformat(),
     }
 
