@@ -1,0 +1,10 @@
+From: victim@example.org
+To: investigator@example.org
+Subject: Suspicious login alert
+Date: Sun, 19 Apr 2026 09:30:00 +0530
+
+This file is the default evidence input.
+Replace this text with any evidence content, then run:
+
+python scripts/demo.py --backend sqlite
+

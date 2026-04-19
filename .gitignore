@@ -1,0 +1,16 @@
+__pycache__/
+*.py[cod]
+*.sqlite
+*.sqlite-journal
+.pytest_cache/
+.env
+.venv/
+venv/
+pytest-cache-files-*/
+tmp-pytest/
+test_runs/
+
+data/
+evidence_vault/
+build/
+.expo-test-export*/

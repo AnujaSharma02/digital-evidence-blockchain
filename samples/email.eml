@@ -1,0 +1,9 @@
+From: victim@example.org
+To: investigator@example.org
+Subject: Suspicious login alert
+Date: Sun, 19 Apr 2026 09:30:00 +0530
+
+This sample email represents digital evidence collected during a cybercrime investigation.
+IP: 203.0.113.42
+Action: Password reset requested from an unfamiliar device.
+
