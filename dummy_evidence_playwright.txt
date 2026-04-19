@@ -1,0 +1,4 @@
+Digital evidence demo file
+Case: Playwright deployment test
+Purpose: Verify register, integrity check, and tamper detection flow.
+Timestamp: 2026-04-19
