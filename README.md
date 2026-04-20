@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # Blockchain-Based Digital Evidence Integrity System
 
 Working CLI prototype for the CSE 435 seminar topic: ensuring digital evidence integrity with SHA-256 fingerprints, off-chain evidence storage, and an immutable ledger record.
@@ -231,3 +232,7 @@ Use the Supabase API key format supported by your Supabase project/client versio
 ## Scope Notes
 
 This is a seminar prototype, not a production evidence system. It intentionally excludes authentication, role-based access control, IPFS/S3 storage, legal compliance workflows, and zero-knowledge proofs. The CLI local vault is plaintext; `src/vault.py` marks AES-GCM encryption as future work.
+=======
+# digital-evidence-blockchain
+A blockchain-based system to ensure digital evidence integrity by storing file hashes and verifying authenticity.
+>>>>>>> e5ab1b6734292278a36dbb2d88ce382b0aa8112d
